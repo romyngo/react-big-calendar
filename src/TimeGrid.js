@@ -214,6 +214,7 @@ export default class TimeGrid extends Component {
           getDrilldownView={this.props.getDrilldownView}
         />
         <Scrollbars
+          autoHide
           autoHeight
           autoHeightMax={maxHeight}
           onScroll={this.handleScroll}
