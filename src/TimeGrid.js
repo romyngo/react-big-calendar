@@ -4,6 +4,7 @@ import raf from 'dom-helpers/util/requestAnimationFrame'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
 import memoize from 'memoize-one'
+import { Scrollbars } from 'react-custom-scrollbars'
 
 import * as dates from './utils/dates'
 import DayColumn from './DayColumn'
@@ -154,6 +155,7 @@ export default class TimeGrid extends Component {
       max,
       showMultiDayTimes,
       longPressThreshold,
+      maxHeight,
     } = this.props
 
     width = width || this.state.gutterWidth
@@ -211,25 +213,28 @@ export default class TimeGrid extends Component {
           onDrillDown={this.props.onDrillDown}
           getDrilldownView={this.props.getDrilldownView}
         />
-        <div
-          ref={this.contentRef}
-          className="rbc-time-content"
+        <Scrollbars
+          autoHeight
+          autoHeightMax={maxHeight}
           onScroll={this.handleScroll}
         >
-          <TimeGutter
-            date={start}
-            ref={this.gutterRef}
-            localizer={localizer}
-            min={dates.merge(start, min)}
-            max={dates.merge(start, max)}
-            step={this.props.step}
-            getNow={this.props.getNow}
-            timeslots={this.props.timeslots}
-            components={components}
-            className="rbc-time-gutter"
-          />
-          {this.renderEvents(range, rangeEvents, getNow())}
-        </div>
+          <div ref={this.contentRef} className="rbc-time-content">
+            <TimeGutter
+              date={start}
+              ref={this.gutterRef}
+              localizer={localizer}
+              min={dates.merge(start, min)}
+              q
+              max={dates.merge(start, max)}
+              step={this.props.step}
+              getNow={this.props.getNow}
+              timeslots={this.props.timeslots}
+              components={components}
+              className="rbc-time-gutter"
+            />
+            {this.renderEvents(range, rangeEvents, getNow())}
+          </div>
+        </Scrollbars>
       </div>
     )
   }
@@ -295,6 +300,7 @@ TimeGrid.propTypes = {
   events: PropTypes.array.isRequired,
   resources: PropTypes.array,
 
+  maxHeight: PropTypes.number,
   step: PropTypes.number,
   timeslots: PropTypes.number,
   range: PropTypes.arrayOf(PropTypes.instanceOf(Date)),
