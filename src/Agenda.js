@@ -1,8 +1,11 @@
 import PropTypes from 'prop-types'
 import React from 'react'
+import { findDOMNode } from 'react-dom'
 import classes from 'dom-helpers/class'
 import getWidth from 'dom-helpers/query/width'
+import getHeight from 'dom-helpers/query/height'
 import scrollbarSize from 'dom-helpers/util/scrollbarSize'
+import { Scrollbars } from 'react-custom-scrollbars'
 
 import * as dates from './utils/dates'
 import { navigate } from './utils/constants'
@@ -27,8 +30,17 @@ class Agenda extends React.Component {
     this._adjustHeader()
   }
 
+  headerRef = ref => {
+    this.header = ref && findDOMNode(ref)
+  }
+
   render() {
-    let { length, date, events, accessors, localizer } = this.props
+    let headerHeight = 0
+    if (this.header) {
+      headerHeight = getHeight(this.header)
+    }
+
+    let { length, date, events, accessors, localizer, maxHeight } = this.props
     let { messages } = localizer
     let end = dates.add(date, length, 'day')
 
@@ -42,7 +54,11 @@ class Agenda extends React.Component {
       <div className="rbc-agenda-view">
         {events.length !== 0 ? (
           <React.Fragment>
-            <table ref={this.headerRef} className="rbc-agenda-table">
+            <table
+              ref={this.headerRef}
+              className="rbc-agenda-table"
+              ref={this.headerRef}
+            >
               <thead>
                 <tr>
                   <th className="rbc-header" ref={this.dateColRef}>
@@ -55,13 +71,19 @@ class Agenda extends React.Component {
                 </tr>
               </thead>
             </table>
-            <div className="rbc-agenda-content" ref={this.contentRef}>
-              <table className="rbc-agenda-table">
-                <tbody ref={this.tbodyRef}>
-                  {range.map((day, idx) => this.renderDay(day, events, idx))}
-                </tbody>
-              </table>
-            </div>
+            <Scrollbars
+              autoHide
+              autoHeight
+              autoHeightMax={maxHeight - headerHeight}
+            >
+              <div className="rbc-agenda-content" ref={this.contentRef}>
+                <table className="rbc-agenda-table">
+                  <tbody ref={this.tbodyRef}>
+                    {range.map((day, idx) => this.renderDay(day, events, idx))}
+                  </tbody>
+                </table>
+              </div>
+            </Scrollbars>
           </React.Fragment>
         ) : (
           <span className="rbc-agenda-empty">{messages.noEventsInRange}</span>
@@ -201,6 +223,7 @@ Agenda.propTypes = {
   length: PropTypes.number.isRequired,
 
   selected: PropTypes.object,
+  maxHeight: PropTypes.number,
 
   accessors: PropTypes.object.isRequired,
   components: PropTypes.object.isRequired,

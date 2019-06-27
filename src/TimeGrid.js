@@ -11,6 +11,7 @@ import DayColumn from './DayColumn'
 import TimeGutter from './TimeGutter'
 
 import getWidth from 'dom-helpers/query/width'
+import getHeight from 'dom-helpers/query/height'
 import TimeGridHeader from './TimeGridHeader'
 import { notify } from './utils/helpers'
 import { inRange, sortEvents } from './utils/eventLevels'
@@ -87,6 +88,10 @@ export default class TimeGrid extends Component {
     this.gutter = ref && findDOMNode(ref)
   }
 
+  headerRef = ref => {
+    this.header = ref && findDOMNode(ref)
+  }
+
   handleSelectAlldayEvent = (...args) => {
     //cancel any pending selections so only the event click goes through.
     this.clearSelection()
@@ -139,6 +144,11 @@ export default class TimeGrid extends Component {
   }
 
   render() {
+    let headerHeight = 0
+    if (this.header) {
+      headerHeight = getHeight(this.header)
+    }
+
     let {
       events,
       range,
@@ -205,6 +215,7 @@ export default class TimeGrid extends Component {
           getters={getters}
           components={components}
           scrollRef={this.scrollRef}
+          ref={this.headerRef}
           isOverflowing={this.state.isOverflowing}
           longPressThreshold={longPressThreshold}
           onSelectSlot={this.handleSelectAllDaySlot}
@@ -216,7 +227,7 @@ export default class TimeGrid extends Component {
         <Scrollbars
           autoHide
           autoHeight
-          autoHeightMax={maxHeight}
+          autoHeightMax={maxHeight - headerHeight}
           onScroll={this.handleScroll}
         >
           <div ref={this.contentRef} className="rbc-time-content">
@@ -225,7 +236,6 @@ export default class TimeGrid extends Component {
               ref={this.gutterRef}
               localizer={localizer}
               min={dates.merge(start, min)}
-              q
               max={dates.merge(start, max)}
               step={this.props.step}
               getNow={this.props.getNow}

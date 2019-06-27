@@ -5,11 +5,13 @@ import cn from 'classnames'
 
 import * as dates from './utils/dates'
 import chunk from 'lodash/chunk'
+import { Scrollbars } from 'react-custom-scrollbars'
 
 import { navigate, views } from './utils/constants'
 import { notify } from './utils/helpers'
 import getPosition from 'dom-helpers/query/position'
 import raf from 'dom-helpers/util/requestAnimationFrame'
+import getHeight from 'dom-helpers/query/height'
 
 import Popup from './Popup'
 import Overlay from 'react-overlays/Overlay'
@@ -72,8 +74,16 @@ class MonthView extends React.Component {
     return findDOMNode(this)
   }
 
+  headerRef = ref => {
+    this.header = ref && findDOMNode(ref)
+  }
+
   render() {
-    let { date, localizer, className } = this.props,
+    let headerHeight = 0
+    if (this.header) {
+      headerHeight = getHeight(this.header)
+    }
+    let { date, localizer, className, maxHeight } = this.props,
       month = dates.visibleDays(date, localizer),
       weeks = chunk(month, 7)
 
@@ -81,10 +91,16 @@ class MonthView extends React.Component {
 
     return (
       <div className={cn('rbc-month-view', className)}>
-        <div className="rbc-row rbc-month-header">
+        <div className="rbc-row rbc-month-header" ref={this.headerRef}>
           {this.renderHeaders(weeks[0])}
         </div>
-        {weeks.map(this.renderWeek)}
+        <Scrollbars
+          autoHide
+          autoHeight
+          autoHeightMax={maxHeight - headerHeight}
+        >
+          {weeks.map(this.renderWeek)}
+        </Scrollbars>
         {this.props.popup && this.renderOverlay()}
       </div>
     )
@@ -297,6 +313,7 @@ MonthView.propTypes = {
   max: PropTypes.instanceOf(Date),
 
   step: PropTypes.number,
+  maxHeight: PropTypes.number,
   getNow: PropTypes.func.isRequired,
 
   scrollToTime: PropTypes.instanceOf(Date),
