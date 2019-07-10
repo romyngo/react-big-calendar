@@ -11,7 +11,6 @@ import DayColumn from './DayColumn'
 import TimeGutter from './TimeGutter'
 
 import getWidth from 'dom-helpers/query/width'
-import getHeight from 'dom-helpers/query/height'
 import TimeGridHeader from './TimeGridHeader'
 import { notify } from './utils/helpers'
 import { inRange, sortEvents } from './utils/eventLevels'
@@ -21,7 +20,11 @@ export default class TimeGrid extends Component {
   constructor(props) {
     super(props)
 
-    this.state = { gutterWidth: undefined, isOverflowing: null }
+    this.state = {
+      gutterWidth: undefined,
+      isOverflowing: null,
+      headerHeight: 0,
+    }
 
     this.scrollRef = React.createRef()
     this.contentRef = React.createRef()
@@ -144,11 +147,6 @@ export default class TimeGrid extends Component {
   }
 
   render() {
-    let headerHeight = 0
-    if (this.header) {
-      headerHeight = getHeight(this.header)
-    }
-
     let {
       events,
       range,
@@ -166,6 +164,7 @@ export default class TimeGrid extends Component {
       showMultiDayTimes,
       longPressThreshold,
       maxHeight,
+      assignHeaderRef,
     } = this.props
 
     width = width || this.state.gutterWidth
@@ -215,7 +214,7 @@ export default class TimeGrid extends Component {
           getters={getters}
           components={components}
           scrollRef={this.scrollRef}
-          ref={this.headerRef}
+          ref={assignHeaderRef}
           isOverflowing={this.state.isOverflowing}
           longPressThreshold={longPressThreshold}
           onSelectSlot={this.handleSelectAllDaySlot}
@@ -227,7 +226,7 @@ export default class TimeGrid extends Component {
         <Scrollbars
           autoHide
           autoHeight
-          autoHeightMax={maxHeight - headerHeight}
+          autoHeightMax={maxHeight}
           onScroll={this.handleScroll}
         >
           <div ref={this.contentRef} className="rbc-time-content">
@@ -311,7 +310,6 @@ TimeGrid.propTypes = {
   events: PropTypes.array.isRequired,
   resources: PropTypes.array,
 
-  maxHeight: PropTypes.number,
   step: PropTypes.number,
   timeslots: PropTypes.number,
   range: PropTypes.arrayOf(PropTypes.instanceOf(Date)),
@@ -342,6 +340,9 @@ TimeGrid.propTypes = {
   onDoubleClickEvent: PropTypes.func,
   onDrillDown: PropTypes.func,
   getDrilldownView: PropTypes.func.isRequired,
+
+  maxHeight: PropTypes.number,
+  assignHeaderRef: PropTypes.func,
 }
 
 TimeGrid.defaultProps = {

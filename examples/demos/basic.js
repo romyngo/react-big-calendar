@@ -19,7 +19,8 @@ let Basic = ({ localizer }) => (
     step={60}
     showMultiDayTimes
     max={dates.add(dates.endOf(new Date(2015, 17, 1), 'day'), -1, 'hours')}
-    maxHeight={300}
+    maxHeight={500}
+    assignHeaderRef={ref => console.log(ref)}
     defaultDate={new Date(2015, 3, 1)}
     components={{
       timeSlotWrapper: ColoredDateCellWrapper,
